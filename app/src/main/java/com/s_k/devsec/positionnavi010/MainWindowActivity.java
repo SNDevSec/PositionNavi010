@@ -1,14 +1,11 @@
 package com.s_k.devsec.positionnavi010;
 
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 public class MainWindowActivity extends AppCompatActivity {
 
@@ -20,8 +17,20 @@ public class MainWindowActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_window);
 
-//        DrawArea drawArea = new DrawArea(MainWindowActivity.this);
-//        setContentView(drawArea);
+        Button button1 = (Button) findViewById(R.id.btDemo1);
+        button1.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+
+            }
+        });
+        Button button2 = (Button) findViewById(R.id.btDemo2);
+        button2.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+
+            }
+        });
     }
 
     @Override
@@ -36,25 +45,5 @@ public class MainWindowActivity extends AppCompatActivity {
         ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams)customView.getLayoutParams();
         marginLayoutParams.height = customViewWidth;
         customView.setLayoutParams(marginLayoutParams);
-
-
     }
-
-//    class DrawArea extends View{
-//        private Paint paint;
-//
-//        private float StrokeWidth = 20.0f;
-//
-//        public DrawArea(Context context){
-//            super(context);
-//            paint = new Paint();
-//        }
-//
-//        protected void onDraw (Canvas canvas){
-//            paint.setColor(Color.argb(255,255,0,255));
-//            paint.setStrokeWidth(StrokeWidth);
-//
-//            canvas.drawRect(300,300,600, 600, paint);
-//        }
-//    }
 }
