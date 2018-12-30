@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">PositionNavi0.1.0</string>
     <string name="tv_distance">distance:</string>
-    <string name="tv_angle">angle:</string>
+    <string name="tv_angle">angleθ:</string>
     <string name="bt_demo1">Demo1</string>
     <string name="bt_demo2">Demo2</string>
     <string name="bt_demo3">Demo3</string>

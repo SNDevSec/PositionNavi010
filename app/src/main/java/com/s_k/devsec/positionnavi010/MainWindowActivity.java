@@ -23,48 +23,51 @@ public class MainWindowActivity extends AppCompatActivity {
         final TextView tvAngle = findViewById(R.id.tvAngle);
         tvAngle.setText("0");
 
+        final CustomView customView = findViewById(R.id.customView);
+
         Button button1 = findViewById(R.id.btDemo1);
         button1.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                CustomView customView = findViewById(R.id.customView);
-                customView.showCanvas(false, 30);
+                double angle = 30;
+                customView.showCanvas(false, angle);
                 Log.d("MainWindowActivity", "bt_number=1");
                 tvDistance.setText("10");
-                tvAngle.setText("30");
+                tvAngle.setText("" + angle);
             }
         });
         Button button2 = findViewById(R.id.btDemo2);
         button2.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                CustomView customView = findViewById(R.id.customView);
-                customView.showCanvas(false, 60);
+                double angle = 60;
+                customView.showCanvas(false, angle);
                 Log.d("MainWindowActivity", "bt_number=2");
                 tvDistance.setText("20");
-                tvAngle.setText("60");
+                tvAngle.setText("" + angle);
             }
         });
         Button button3 = findViewById(R.id.btDemo3);
         button3.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                CustomView customView = findViewById(R.id.customView);
-                customView.showCanvas(false, -30);
+                double angle = -10;
+                customView.showCanvas(false, angle);
                 Log.d("MainWindowActivity", "bt_number=3");
                 tvDistance.setText("5");
-                tvAngle.setText("-30");
+                tvAngle.setText("" + angle);
             }
         });
         Button button4 = findViewById(R.id.btReset);
         button4.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
+                double angle = 0;
                 CustomView customView = findViewById(R.id.customView);
-                customView.showCanvas(true, 0);
+                customView.showCanvas(true, angle);
                 Log.d("MainWindowActivity", "bt_number=4");
                 tvDistance.setText("0");
-                tvAngle.setText("0");
+                tvAngle.setText("" + angle);
             }
         });
     }
