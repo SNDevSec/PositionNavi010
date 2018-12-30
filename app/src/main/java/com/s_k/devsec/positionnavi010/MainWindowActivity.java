@@ -8,10 +8,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 public class MainWindowActivity extends AppCompatActivity {
 
-    static int monitorWidth;
+    static int customViewWidth;
+    static int customViewHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,9 +27,17 @@ public class MainWindowActivity extends AppCompatActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus){
         super.onWindowFocusChanged(hasFocus);
-        monitorWidth = findViewById(R.id.customView).getWidth();
+        customViewWidth = findViewById(R.id.customView).getWidth();
+        customViewHeight = findViewById(R.id.customView).getHeight();
+        Log.i("MainWindowActivity", "CustomView幅:"+ customViewWidth);
+        Log.i("MainWindowActivity", "CustomView高:"+ customViewHeight);
 
-        Log.i("PositionNavi010", "画面幅:"+ monitorWidth);
+        CustomView customView = (CustomView) findViewById(R.id.customView);
+        ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams)customView.getLayoutParams();
+        marginLayoutParams.height = customViewWidth;
+        customView.setLayoutParams(marginLayoutParams);
+
+
     }
 
 //    class DrawArea extends View{

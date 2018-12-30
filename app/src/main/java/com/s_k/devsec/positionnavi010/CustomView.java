@@ -5,7 +5,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+
+import static java.lang.Math.sqrt;
 
 public class CustomView extends View {
 
@@ -19,7 +22,10 @@ public class CustomView extends View {
     @Override
     protected void onDraw(Canvas canvas){
 
-        int monitorWidth = MainWindowActivity.monitorWidth;
+        float centerXPosition = MainWindowActivity.customViewWidth;
+        //正三角形の一辺 = width / (3^(1/2) = 0.578)
+//        float yourYPosition = centerXPosition / 2 * 2 / (float)sqrt(3.0);
+        float yourYPosition = centerXPosition * (float)0.8;
 
         //背景
         canvas.drawColor(Color.argb(255, 255, 255, 255));
@@ -29,7 +35,11 @@ public class CustomView extends View {
         paint.setStrokeWidth(10);
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.STROKE);
-        canvas.drawPoint(monitorWidth/2,0, paint);
+        canvas.drawPoint(centerXPosition/2,0, paint);
+//        canvas.drawPoint(centerXPosition/2,centerXPosition * (2 / (int)Math.sqrt(3.0)) * (2 / 5), paint);
+//        canvas.drawPoint(centerXPosition/2,centerXPosition /2, paint);
+        canvas.drawCircle(centerXPosition/2, yourYPosition,10, paint);
+        Log.i("CustomView", "yourYPosition:"+ yourYPosition);
 
 //        //円
 //        paint.setColor(Color.argb(255,68,255,255));
