@@ -118,7 +118,7 @@ public class CustomView extends View {
         paint.setColor(Color.BLACK);
         paint.setStrokeWidth(5);
         paint.setTextSize(50);
-        canvas.drawText("Target", targetXPosition, targetYPosition - 50, paint);
+        canvas.drawText("Target", targetXPosition - 70, targetYPosition - 50, paint);
 
         //ターゲットまでの線表示
         paint.setStrokeWidth(1);
