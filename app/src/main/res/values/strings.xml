@@ -6,5 +6,8 @@
     <string name="bt_demo2">Demo2</string>
     <string name="bt_demo3">Demo3</string>
     <string name="bt_reset">Reset</string>
+    <string name="bt_getIp">GetIP</string>
+    <string name="bt_send">Send</string>
+    <string name="bt_receive">Reveive</string>
 
 </resources>

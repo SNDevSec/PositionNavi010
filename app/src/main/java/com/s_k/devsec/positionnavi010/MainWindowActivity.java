@@ -1,5 +1,8 @@
 package com.s_k.devsec.positionnavi010;
 
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,6 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.IOException;
 
 public class MainWindowActivity extends AppCompatActivity {
 
@@ -70,6 +76,27 @@ public class MainWindowActivity extends AppCompatActivity {
                 tvAngle.setText("" + angle);
             }
         });
+        Button buttonGetIp = findViewById(R.id.btGetIp);
+        buttonGetIp.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                String ip = getWifiIPAddress(MainWindowActivity.this);
+                Toast.makeText(MainWindowActivity.this, ip, Toast.LENGTH_SHORT).show();
+
+            }
+        });
+    }
+
+    private static final String LOCAL_LOOPBACK_ADDR = "127.0.0.1";
+    private static final String INVALID_ADDR = "0.0.0.0";
+
+    private static String getWifiIPAddress(Context context) {
+        WifiManager manager = (WifiManager)context.getSystemService(WIFI_SERVICE);
+        WifiInfo info = manager.getConnectionInfo();
+        int ipAddr = info.getIpAddress();
+        String ipString = String.format("%02d.%02d.%02d.%02d",
+                (ipAddr>>0)&0xff, (ipAddr>>8)&0xff, (ipAddr>>16)&0xff, (ipAddr>>24)&0xff);
+        return ipString;
     }
 
     @Override
