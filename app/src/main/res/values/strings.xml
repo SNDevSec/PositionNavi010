@@ -6,8 +6,9 @@
     <string name="bt_demo2">Demo2</string>
     <string name="bt_demo3">Demo3</string>
     <string name="bt_reset">Reset</string>
-    <string name="bt_getIp">GetIP</string>
-    <string name="bt_send">Send</string>
-    <string name="bt_receive">Reveive</string>
-
+    <string name="bt_ShowIp">Show IP</string>
+    <string name="bt_ShowPortNo">Show Port No.</string>
+    <string name="bt_send">Rcv. Start</string>
+    <string name="bt_receive">Rcv. Stop</string>
+    <string name="menu_list_options_setDeviceIp">設定</string>
 </resources>

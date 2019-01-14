@@ -1,32 +1,64 @@
 package com.s_k.devsec.positionnavi010;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MainWindowActivity extends AppCompatActivity {
 
+    TextView tvDistance;
+    TextView tvAngle;
+
     static int customViewWidth;
     static int customViewHeight;
+
+    Globals globals;
+    UDPReceiverThread mUDPReceiver= null;
+    Handler mHandler;
+
+    Button btRcvStart;
+    Button btRcvStop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_window);
 
-        final TextView tvDistance = findViewById(R.id.tvDistance);
+        globals = (Globals) this.getApplication();
+
+        String ip = getWifiIPAddress(MainWindowActivity.this);
+        globals.setIpAddress(ip);
+
+        mUDPReceiver= new UDPReceiverThread(MainWindowActivity.this);
+        mUDPReceiver.start();
+
+        mHandler = new Handler();
+
+        tvDistance = findViewById(R.id.tvDistance);
         tvDistance.setText("0");
-        final TextView tvAngle = findViewById(R.id.tvAngle);
+        tvAngle = findViewById(R.id.tvAngle);
         tvAngle.setText("0");
 
         final CustomView customView = findViewById(R.id.customView);
@@ -76,27 +108,166 @@ public class MainWindowActivity extends AppCompatActivity {
                 tvAngle.setText("" + angle);
             }
         });
-        Button buttonGetIp = findViewById(R.id.btGetIp);
-        buttonGetIp.setOnClickListener(new View.OnClickListener(){
+        Button buttonShowIp = findViewById(R.id.btShowIp);
+        buttonShowIp.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                String ip = getWifiIPAddress(MainWindowActivity.this);
+                String ip = globals.getIpAddress();
                 Toast.makeText(MainWindowActivity.this, ip, Toast.LENGTH_SHORT).show();
-
             }
         });
+        Button buttonShowPortNo = findViewById(R.id.btShowPortNo);
+        buttonShowPortNo.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                String portNo = globals.getPortNumber();
+                Toast.makeText(MainWindowActivity.this, portNo, Toast.LENGTH_SHORT).show();
+            }
+        });
+//        btRcvStart = findViewById(R.id.btRcvStart);
+//        btRcvStart.setEnabled(false);
+//        btRcvStart.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View view){
+//                mUDPReceiver.start();
+//                Toast.makeText(MainWindowActivity.this, "受信開始", Toast.LENGTH_SHORT).show();
+//                btRcvStop.setEnabled(true);
+//                btRcvStart.setEnabled(false);
+//            }
+//        });
+//        btRcvStop = findViewById(R.id.btRcvStop);
+//        btRcvStop.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View view){
+//                mUDPReceiver.onStop();
+//                Toast.makeText(MainWindowActivity.this, "受信停止", Toast.LENGTH_SHORT).show();
+//                btRcvStart.setEnabled(true);
+//                btRcvStop.setEnabled(false);
+//            }
+//        });
     }
-
-    private static final String LOCAL_LOOPBACK_ADDR = "127.0.0.1";
-    private static final String INVALID_ADDR = "0.0.0.0";
 
     private static String getWifiIPAddress(Context context) {
         WifiManager manager = (WifiManager)context.getSystemService(WIFI_SERVICE);
         WifiInfo info = manager.getConnectionInfo();
         int ipAddr = info.getIpAddress();
-        String ipString = String.format("%02d.%02d.%02d.%02d",
+        String ipString = String.format("%d.%d.%d.%d",
                 (ipAddr>>0)&0xff, (ipAddr>>8)&0xff, (ipAddr>>16)&0xff, (ipAddr>>24)&0xff);
         return ipString;
+    }
+
+    class UDPReceiverThread extends Thread {
+        private static final String TAG="UDPReceiverThread";
+
+        public static final String COMM_END_STRING="end";
+
+        Globals globals = null;
+        DatagramSocket mDatagramRecvSocket= null;
+        MainWindowActivity mActivity= null;
+        boolean mIsArive= false;
+
+        Object obj = null;
+
+        public UDPReceiverThread( MainWindowActivity mainActivity ) {
+            super();
+            mActivity= mainActivity;
+            globals = (Globals) mActivity.getApplication();
+            int commPort= Integer.parseInt(globals.getPortNumber());
+            Log.d("MainWindowActivity", "Globalsポート番号:"+ commPort);
+            // ソケット生成
+            try {
+                mDatagramRecvSocket= new DatagramSocket(commPort);
+            }catch( Exception e ) {
+                e.printStackTrace();
+            }
+
+        }
+        @Override
+        public void start() {
+            mIsArive= true;
+            Log.d(TAG,"mIsArive status:"+ mIsArive);
+            super.start();
+        }
+        public void onStop() {
+            mIsArive= false;
+            Log.d(TAG,"mIsArive status:"+ mIsArive);
+        }
+        // 受信用スレッドのメイン関数
+        @Override
+        public void run() {
+            // UDPパケット生成（最初に一度だけ生成して使いまわし）
+            byte[] receiveBuffer = new byte[1024];
+            DatagramPacket receivePacket =
+                    new DatagramPacket(receiveBuffer, receiveBuffer.length);
+
+            // スレッドループ開始
+            Log.d(TAG,"In run(): thread start.");
+            try {
+                while (mIsArive) {
+                    // UDPパケット受信
+                    mDatagramRecvSocket.receive(receivePacket);
+
+//                  String packetString = new String(receivePacket.getData(), 0, receivePacket.getLength());
+                    try {
+                        ByteArrayInputStream bis = new ByteArrayInputStream(receivePacket.getData(), 0, receivePacket.getLength());
+                        ObjectInput in = new ObjectInputStream(bis);
+                        obj = in.readObject();
+                    }catch (Exception ex){
+                    }
+                    Log.d(TAG,"In run(): packet received :" + obj);
+
+//                    if( packetString.equals(COMM_END_STRING) ) {
+//                        // 終了メッセージを受信したらActivity終了
+//                        // whileループを抜けてソケットclose＆スレッド終了
+//                        mActivity.finish();
+//                        break;
+//                    }
+                         // 受信結果の画面表示
+//                    mActivity.printString(packetString);
+
+                    String message = obj.toString();
+//                    final String dist = message.substring(1,3);
+                    message = message.replaceAll("[^-?0-9]+", " ");
+                    List<String> list = Arrays.asList(message.trim().split(" "));
+                    final String dist = list.get(0);
+                    Log.d(TAG,"dist: " + dist);
+//                    final String angle = message.substring(5,7);
+                    final String angle = list.get(1);
+                    Log.d(TAG,"angle: " + angle);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            tvDistance.setText(dist);
+                            tvAngle.setText(angle);
+                            CustomView customView = findViewById(R.id.customView);
+//                            try {
+//                                Thread.sleep(1000);
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
+                            customView.showCanvas(false, Double.parseDouble(angle));
+                            Log.d(TAG, "In run(): Canvas refleshed");
+                        }
+                    });
+
+                }
+            }catch( Exception e ) {
+                e.printStackTrace();
+            }
+            Log.d(TAG,"In run(): thread end.");
+            // ソケットclose（これをしないと2回目以降の起動ができない）
+            mDatagramRecvSocket.close();
+            mDatagramRecvSocket= null;
+            mActivity= null;
+            receivePacket= null;
+            receiveBuffer= null;
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        mUDPReceiver.onStop();
+        super.onDestroy();
     }
 
     @Override
@@ -111,5 +282,24 @@ public class MainWindowActivity extends AppCompatActivity {
         ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams)customView.getLayoutParams();
         marginLayoutParams.height = customViewWidth;
         customView.setLayoutParams(marginLayoutParams);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_options_menu_list, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        int itemId = item.getItemId();
+        switch (itemId){
+            case R.id.menuListOptionSetting:
+                Intent intent = new Intent(MainWindowActivity.this, SettingActivity.class);
+                startActivity(intent);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
