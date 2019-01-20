@@ -2,6 +2,7 @@ package com.s_k.devsec.positionnavi010;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -43,6 +44,7 @@ public class MainWindowActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("MainWindowActivity", "onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_window);
 
@@ -165,6 +167,8 @@ public class MainWindowActivity extends AppCompatActivity {
         DatagramSocket mDatagramRecvSocket= null;
         MainWindowActivity mActivity= null;
         boolean mIsArive= false;
+        DatagramPacket receivePacket = null;
+        byte[] receiveBuffer = null;
 
         Object obj = null;
 
@@ -189,16 +193,18 @@ public class MainWindowActivity extends AppCompatActivity {
             super.start();
         }
         public void onStop() {
+            Log.d(TAG,"onStop()");
             mIsArive= false;
+            mDatagramRecvSocket.close();
             Log.d(TAG,"mIsArive status:"+ mIsArive);
         }
+
         // 受信用スレッドのメイン関数
         @Override
         public void run() {
             // UDPパケット生成（最初に一度だけ生成して使いまわし）
-            byte[] receiveBuffer = new byte[1024];
-            DatagramPacket receivePacket =
-                    new DatagramPacket(receiveBuffer, receiveBuffer.length);
+            receiveBuffer = new byte[1024];
+            receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
 
             // スレッドループ開始
             Log.d(TAG,"In run(): thread start.");
@@ -256,8 +262,10 @@ public class MainWindowActivity extends AppCompatActivity {
             }
             Log.d(TAG,"In run(): thread end.");
             // ソケットclose（これをしないと2回目以降の起動ができない）
-            mDatagramRecvSocket.close();
-            mDatagramRecvSocket= null;
+            if(mDatagramRecvSocket != null){
+                mDatagramRecvSocket.close();
+                mDatagramRecvSocket= null;
+            }
             mActivity= null;
             receivePacket= null;
             receiveBuffer= null;
@@ -266,6 +274,7 @@ public class MainWindowActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
+        Log.d("MainWindowActivity", "onDestroy()");
         mUDPReceiver.onStop();
         super.onDestroy();
     }
@@ -278,10 +287,32 @@ public class MainWindowActivity extends AppCompatActivity {
         Log.d("MainWindowActivity", "CustomView幅:"+ customViewWidth);
         Log.d("MainWindowActivity", "CustomView高:"+ customViewHeight);
 
-        CustomView customView = (CustomView) findViewById(R.id.customView);
+        int orientation = getResources().getConfiguration().orientation;
+        CustomView customView = findViewById(R.id.customView);
         ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams)customView.getLayoutParams();
-        marginLayoutParams.height = customViewWidth;
-        customView.setLayoutParams(marginLayoutParams);
+
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // 横向きの場合
+            customViewWidth = customViewHeight;
+            marginLayoutParams.width = customViewWidth;
+            Log.d("MainWindowActivity", "CustomView幅(修正):"+ customViewWidth);
+            customView.setLayoutParams(marginLayoutParams);
+        }
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            // 縦向きの場合
+            customViewHeight = customViewWidth;
+            marginLayoutParams.height = customViewHeight;
+            Log.d("MainWindowActivity", "CustomView高(修正):"+ customViewHeight);
+            customView.setLayoutParams(marginLayoutParams);
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        Log.d("MainWindowActivity", "onConfigurationChanged()");
+        super.onConfigurationChanged(newConfig);
+        //処理
     }
 
     @Override
