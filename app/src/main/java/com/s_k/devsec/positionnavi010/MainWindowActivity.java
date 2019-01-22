@@ -23,7 +23,6 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,16 +30,20 @@ public class MainWindowActivity extends AppCompatActivity {
 
     TextView tvDistance;
     TextView tvAngle;
+    TextView tvIpAddress;
+    TextView tvPortNumber;
 
     static int customViewWidth;
     static int customViewHeight;
 
     Globals globals;
     UDPReceiverThread mUDPReceiver= null;
+    int commPort;
+
     Handler mHandler;
 
-    Button btRcvStart;
-    Button btRcvStop;
+//    Button btRcvStart;
+//    Button btRcvStop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +65,10 @@ public class MainWindowActivity extends AppCompatActivity {
         tvDistance.setText("0");
         tvAngle = findViewById(R.id.tvAngle);
         tvAngle.setText("0");
+        tvIpAddress = findViewById(R.id.tvIpAddress);
+        tvIpAddress.setText(globals.getIpAddress());
+        tvPortNumber = findViewById(R.id.tvPortNumber);
+        tvPortNumber.setText(globals.getPortNumber());
 
         final CustomView customView = findViewById(R.id.customView);
 
@@ -110,22 +117,22 @@ public class MainWindowActivity extends AppCompatActivity {
                 tvAngle.setText("" + angle);
             }
         });
-        Button buttonShowIp = findViewById(R.id.btShowIp);
-        buttonShowIp.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                String ip = globals.getIpAddress();
-                Toast.makeText(MainWindowActivity.this, ip, Toast.LENGTH_SHORT).show();
-            }
-        });
-        Button buttonShowPortNo = findViewById(R.id.btShowPortNo);
-        buttonShowPortNo.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                String portNo = globals.getPortNumber();
-                Toast.makeText(MainWindowActivity.this, portNo, Toast.LENGTH_SHORT).show();
-            }
-        });
+//        Button buttonShowIp = findViewById(R.id.btShowIp);
+//        buttonShowIp.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View view){
+//                String ip = globals.getIpAddress();
+//                Toast.makeText(MainWindowActivity.this, ip, Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//        Button buttonShowPortNo = findViewById(R.id.btShowPortNo);
+//        buttonShowPortNo.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View view){
+//                String portNo = globals.getPortNumber();
+//                Toast.makeText(MainWindowActivity.this, portNo, Toast.LENGTH_SHORT).show();
+//            }
+//        });
 //        btRcvStart = findViewById(R.id.btRcvStart);
 //        btRcvStart.setEnabled(false);
 //        btRcvStart.setOnClickListener(new View.OnClickListener(){
@@ -176,7 +183,7 @@ public class MainWindowActivity extends AppCompatActivity {
             super();
             mActivity= mainActivity;
             globals = (Globals) mActivity.getApplication();
-            int commPort= Integer.parseInt(globals.getPortNumber());
+            commPort = Integer.parseInt(globals.getPortNumber());
             Log.d("MainWindowActivity", "Globalsポート番号:"+ commPort);
             // ソケット生成
             try {
@@ -270,6 +277,13 @@ public class MainWindowActivity extends AppCompatActivity {
             receivePacket= null;
             receiveBuffer= null;
         }
+    }
+
+    @Override
+    public void onRestart(){
+        tvPortNumber.setText(globals.getPortNumber());
+        commPort = Integer.parseInt(globals.getPortNumber());
+        super.onRestart();
     }
 
     @Override
