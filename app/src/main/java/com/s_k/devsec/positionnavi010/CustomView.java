@@ -3,7 +3,6 @@ package com.s_k.devsec.positionnavi010;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -36,7 +35,7 @@ public class CustomView extends View {
     @Override
     protected void onDraw(Canvas canvas){
 
-        float customViewWidth = MainWindowActivity.customViewWidth;
+        float customViewWidth = MainActivity.customViewWidth;
         //正三角形の一辺 = width / (3^(1/2) = 0.578)
 //        float yourYPosition = yourXPosition / 2 * 2 / (float)sqrt(3.0);
         float yourXPosition = customViewWidth / 2;

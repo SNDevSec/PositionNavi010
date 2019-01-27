@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInput;
@@ -26,11 +25,10 @@ import java.net.DatagramSocket;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainWindowActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     TextView tvDistance;
     TextView tvAngle;
-    TextView tvIpAddress;
     TextView tvPortNumber;
 
     static int customViewWidth;
@@ -47,16 +45,13 @@ public class MainWindowActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("MainWindowActivity", "onCreate()");
+        Log.d("MainActivity", "onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_window);
 
         globals = (Globals) this.getApplication();
 
-        String ip = getWifiIPAddress(MainWindowActivity.this);
-        globals.setIpAddress(ip);
-
-        mUDPReceiver= new UDPReceiverThread(MainWindowActivity.this);
+        mUDPReceiver= new UDPReceiverThread();
         mUDPReceiver.start();
 
         mHandler = new Handler();
@@ -65,8 +60,10 @@ public class MainWindowActivity extends AppCompatActivity {
         tvDistance.setText("0");
         tvAngle = findViewById(R.id.tvAngle);
         tvAngle.setText("0");
-        tvIpAddress = findViewById(R.id.tvIpAddress);
-        tvIpAddress.setText(globals.getIpAddress());
+        TextView tvSSID = findViewById(R.id.tvSSID);
+        tvSSID.setText(getWifiSSID(MainActivity.this));
+        TextView tvIpAddress = findViewById(R.id.tvIpAddress);
+        tvIpAddress.setText(getWifiIPAddress(MainActivity.this));
         tvPortNumber = findViewById(R.id.tvPortNumber);
         tvPortNumber.setText(globals.getPortNumber());
 
@@ -78,7 +75,7 @@ public class MainWindowActivity extends AppCompatActivity {
             public void onClick(View view){
                 double angle = 30;
                 customView.showCanvas(false, angle);
-                Log.d("MainWindowActivity", "bt_number=1");
+                Log.d("MainActivity", "bt_number=1");
                 tvDistance.setText("10");
                 tvAngle.setText("" + angle);
             }
@@ -89,7 +86,7 @@ public class MainWindowActivity extends AppCompatActivity {
             public void onClick(View view){
                 double angle = 60;
                 customView.showCanvas(false, angle);
-                Log.d("MainWindowActivity", "bt_number=2");
+                Log.d("MainActivity", "bt_number=2");
                 tvDistance.setText("20");
                 tvAngle.setText("" + angle);
             }
@@ -100,7 +97,7 @@ public class MainWindowActivity extends AppCompatActivity {
             public void onClick(View view){
                 double angle = -10;
                 customView.showCanvas(false, angle);
-                Log.d("MainWindowActivity", "bt_number=3");
+                Log.d("MainActivity", "bt_number=3");
                 tvDistance.setText("5");
                 tvAngle.setText("" + angle);
             }
@@ -112,7 +109,7 @@ public class MainWindowActivity extends AppCompatActivity {
                 double angle = 0;
                 CustomView customView = findViewById(R.id.customView);
                 customView.showCanvas(true, angle);
-                Log.d("MainWindowActivity", "bt_number=4");
+                Log.d("MainActivity", "bt_number=4");
                 tvDistance.setText("0");
                 tvAngle.setText("" + angle);
             }
@@ -122,7 +119,7 @@ public class MainWindowActivity extends AppCompatActivity {
 //            @Override
 //            public void onClick(View view){
 //                String ip = globals.getIpAddress();
-//                Toast.makeText(MainWindowActivity.this, ip, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, ip, Toast.LENGTH_SHORT).show();
 //            }
 //        });
 //        Button buttonShowPortNo = findViewById(R.id.btShowPortNo);
@@ -130,7 +127,7 @@ public class MainWindowActivity extends AppCompatActivity {
 //            @Override
 //            public void onClick(View view){
 //                String portNo = globals.getPortNumber();
-//                Toast.makeText(MainWindowActivity.this, portNo, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, portNo, Toast.LENGTH_SHORT).show();
 //            }
 //        });
 //        btRcvStart = findViewById(R.id.btRcvStart);
@@ -139,7 +136,7 @@ public class MainWindowActivity extends AppCompatActivity {
 //            @Override
 //            public void onClick(View view){
 //                mUDPReceiver.start();
-//                Toast.makeText(MainWindowActivity.this, "受信開始", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "受信開始", Toast.LENGTH_SHORT).show();
 //                btRcvStop.setEnabled(true);
 //                btRcvStart.setEnabled(false);
 //            }
@@ -149,7 +146,7 @@ public class MainWindowActivity extends AppCompatActivity {
 //            @Override
 //            public void onClick(View view){
 //                mUDPReceiver.onStop();
-//                Toast.makeText(MainWindowActivity.this, "受信停止", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "受信停止", Toast.LENGTH_SHORT).show();
 //                btRcvStart.setEnabled(true);
 //                btRcvStop.setEnabled(false);
 //            }
@@ -165,26 +162,30 @@ public class MainWindowActivity extends AppCompatActivity {
         return ipString;
     }
 
+    private static String getWifiSSID(Context context) {
+        WifiManager manager = (WifiManager)context.getSystemService(WIFI_SERVICE);
+        WifiInfo info = manager.getConnectionInfo();
+        String  ssid = info.getSSID();
+        return ssid;
+    }
+
     class UDPReceiverThread extends Thread {
         private static final String TAG="UDPReceiverThread";
 
         public static final String COMM_END_STRING="end";
 
-        Globals globals = null;
+//        Globals globals = null;
         DatagramSocket mDatagramRecvSocket= null;
-        MainWindowActivity mActivity= null;
         boolean mIsArive= false;
         DatagramPacket receivePacket = null;
         byte[] receiveBuffer = null;
 
         Object obj = null;
 
-        public UDPReceiverThread( MainWindowActivity mainActivity ) {
+        public UDPReceiverThread() {
             super();
-            mActivity= mainActivity;
-            globals = (Globals) mActivity.getApplication();
             commPort = Integer.parseInt(globals.getPortNumber());
-            Log.d("MainWindowActivity", "Globalsポート番号:"+ commPort);
+            Log.d(TAG, "Globalsポート番号:"+ commPort);
             // ソケット生成
             try {
                 mDatagramRecvSocket= new DatagramSocket(commPort);
@@ -203,6 +204,7 @@ public class MainWindowActivity extends AppCompatActivity {
             Log.d(TAG,"onStop()");
             mIsArive= false;
             mDatagramRecvSocket.close();
+            mDatagramRecvSocket= null;
             Log.d(TAG,"mIsArive status:"+ mIsArive);
         }
 
@@ -273,7 +275,6 @@ public class MainWindowActivity extends AppCompatActivity {
                 mDatagramRecvSocket.close();
                 mDatagramRecvSocket= null;
             }
-            mActivity= null;
             receivePacket= null;
             receiveBuffer= null;
         }
@@ -288,7 +289,7 @@ public class MainWindowActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        Log.d("MainWindowActivity", "onDestroy()");
+        Log.d("MainActivity", "onDestroy()");
         mUDPReceiver.onStop();
         super.onDestroy();
     }
@@ -298,8 +299,8 @@ public class MainWindowActivity extends AppCompatActivity {
         super.onWindowFocusChanged(hasFocus);
         customViewWidth = findViewById(R.id.customView).getWidth();
         customViewHeight = findViewById(R.id.customView).getHeight();
-        Log.d("MainWindowActivity", "CustomView幅:"+ customViewWidth);
-        Log.d("MainWindowActivity", "CustomView高:"+ customViewHeight);
+        Log.d("MainActivity", "CustomView幅:"+ customViewWidth);
+        Log.d("MainActivity", "CustomView高:"+ customViewHeight);
 
         int orientation = getResources().getConfiguration().orientation;
         CustomView customView = findViewById(R.id.customView);
@@ -309,7 +310,7 @@ public class MainWindowActivity extends AppCompatActivity {
             // 横向きの場合
             customViewWidth = customViewHeight;
             marginLayoutParams.width = customViewWidth;
-            Log.d("MainWindowActivity", "CustomView幅(修正):"+ customViewWidth);
+            Log.d("MainActivity", "CustomView幅(修正):"+ customViewWidth);
             customView.setLayoutParams(marginLayoutParams);
         }
 
@@ -317,14 +318,14 @@ public class MainWindowActivity extends AppCompatActivity {
             // 縦向きの場合
             customViewHeight = customViewWidth;
             marginLayoutParams.height = customViewHeight;
-            Log.d("MainWindowActivity", "CustomView高(修正):"+ customViewHeight);
+            Log.d("MainActivity", "CustomView高(修正):"+ customViewHeight);
             customView.setLayoutParams(marginLayoutParams);
         }
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        Log.d("MainWindowActivity", "onConfigurationChanged()");
+        Log.d("MainActivity", "onConfigurationChanged()");
         super.onConfigurationChanged(newConfig);
         //処理
     }
@@ -341,7 +342,7 @@ public class MainWindowActivity extends AppCompatActivity {
         int itemId = item.getItemId();
         switch (itemId){
             case R.id.menuListOptionSetting:
-                Intent intent = new Intent(MainWindowActivity.this, SettingActivity.class);
+                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
                 startActivity(intent);
                 break;
         }

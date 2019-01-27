@@ -6,22 +6,27 @@
     android:layout_height="match_parent"
     android:background="#000"
     android:orientation="horizontal"
-    tools:context=".MainWindowActivity">
+    tools:context=".MainActivity">
 
     <com.s_k.devsec.positionnavi010.CustomView
         android:id="@+id/customView"
         android:layout_width="10dp"
         android:layout_height="match_parent" />
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fadeScrollbars="false"
+    android:scrollbars="horizontal">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginLeft="8dp"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
             android:orientation="horizontal">
 
             <TextView
@@ -54,7 +59,6 @@
             android:id="@+id/linearLayoutAngle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
             android:orientation="horizontal">
 
             <TextView
@@ -86,7 +90,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="start"
-            android:layout_marginLeft="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:text="Navi SSID:"
+                android:textColor="#cccccc"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/tvSSID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text=""
+                android:textColor="#cccccc"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
             android:orientation="horizontal">
 
             <TextView
@@ -109,7 +135,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="start"
-            android:layout_marginLeft="8dp"
             android:orientation="horizontal">
 
             <TextView
@@ -132,7 +157,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
             android:orientation="horizontal">
 
             <Button
@@ -198,4 +222,5 @@
         <!--android:text="@string/bt_receive"/>-->
         <!--</LinearLayout>-->
     </LinearLayout>
+</ScrollView>
 </LinearLayout>
