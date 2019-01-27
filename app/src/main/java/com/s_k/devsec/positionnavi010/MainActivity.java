@@ -23,7 +23,9 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -172,15 +174,12 @@ public class MainActivity extends AppCompatActivity {
     class UDPReceiverThread extends Thread {
         private static final String TAG="UDPReceiverThread";
 
-        public static final String COMM_END_STRING="end";
-
-//        Globals globals = null;
         DatagramSocket mDatagramRecvSocket= null;
         boolean mIsArive= false;
         DatagramPacket receivePacket = null;
         byte[] receiveBuffer = null;
 
-        Object obj = null;
+        Map<String, String> receiveMap = new HashMap<>();
 
         public UDPReceiverThread() {
             super();
@@ -222,32 +221,17 @@ public class MainActivity extends AppCompatActivity {
                     // UDPパケット受信
                     mDatagramRecvSocket.receive(receivePacket);
 
-//                  String packetString = new String(receivePacket.getData(), 0, receivePacket.getLength());
                     try {
                         ByteArrayInputStream bis = new ByteArrayInputStream(receivePacket.getData(), 0, receivePacket.getLength());
                         ObjectInput in = new ObjectInputStream(bis);
-                        obj = in.readObject();
+                        receiveMap = (Map<String, String>)in.readObject();
                     }catch (Exception ex){
                     }
-                    Log.d(TAG,"In run(): packet received :" + obj);
+                    Log.d(TAG,"In run(): packet received :" + receiveMap);
 
-//                    if( packetString.equals(COMM_END_STRING) ) {
-//                        // 終了メッセージを受信したらActivity終了
-//                        // whileループを抜けてソケットclose＆スレッド終了
-//                        mActivity.finish();
-//                        break;
-//                    }
-                         // 受信結果の画面表示
-//                    mActivity.printString(packetString);
-
-                    String message = obj.toString();
-//                    final String dist = message.substring(1,3);
-                    message = message.replaceAll("[^-?0-9]+", " ");
-                    List<String> list = Arrays.asList(message.trim().split(" "));
-                    final String dist = list.get(0);
+                    final String dist = receiveMap.get("dist");
                     Log.d(TAG,"dist: " + dist);
-//                    final String angle = message.substring(5,7);
-                    final String angle = list.get(1);
+                    final String angle = receiveMap.get("angle");
                     Log.d(TAG,"angle: " + angle);
                     mHandler.post(new Runnable() {
                         @Override
@@ -255,11 +239,6 @@ public class MainActivity extends AppCompatActivity {
                             tvDistance.setText(dist);
                             tvAngle.setText(angle);
                             CustomView customView = findViewById(R.id.customView);
-//                            try {
-//                                Thread.sleep(1000);
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
                             customView.showCanvas(false, Double.parseDouble(angle));
                             Log.d(TAG, "In run(): Canvas refleshed");
                         }
