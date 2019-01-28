@@ -32,12 +32,15 @@ public class MainActivity extends AppCompatActivity {
     TextView tvDistance;
     TextView tvAngle;
     TextView tvPortNumber;
+    TextView tvSSID;
+    TextView tvIpAddress;
 
     static int customViewWidth;
     static int customViewHeight;
 
     Globals globals;
-    UDPReceiverThread mUDPReceiver= null;
+    UDPReceiverThread mUDPReceiver = null;
+    WifiStatusUpdateThread mWifiStatusUpdateThread = null;
     int commPort;
 
     Handler mHandler;
@@ -53,18 +56,13 @@ public class MainActivity extends AppCompatActivity {
 
         globals = (Globals) this.getApplication();
 
-        mUDPReceiver= new UDPReceiverThread();
-        mUDPReceiver.start();
-
-        mHandler = new Handler();
-
         tvDistance = findViewById(R.id.tvDistance);
         tvDistance.setText("0");
         tvAngle = findViewById(R.id.tvAngle);
         tvAngle.setText("0");
-        TextView tvSSID = findViewById(R.id.tvSSID);
+        tvSSID = findViewById(R.id.tvSSID);
         tvSSID.setText(getWifiSSID(MainActivity.this));
-        TextView tvIpAddress = findViewById(R.id.tvIpAddress);
+        tvIpAddress = findViewById(R.id.tvIpAddress);
         tvIpAddress.setText(getWifiIPAddress(MainActivity.this));
         tvPortNumber = findViewById(R.id.tvPortNumber);
         tvPortNumber.setText(globals.getPortNumber());
@@ -116,7 +114,16 @@ public class MainActivity extends AppCompatActivity {
                 tvAngle.setText("" + angle);
             }
         });
-//        Button buttonShowIp = findViewById(R.id.btShowIp);
+
+        mHandler = new Handler();
+
+        mUDPReceiver = new UDPReceiverThread();
+        mUDPReceiver.start();
+
+        mWifiStatusUpdateThread = new WifiStatusUpdateThread();
+        mWifiStatusUpdateThread.start();
+
+        //        Button buttonShowIp = findViewById(R.id.btShowIp);
 //        buttonShowIp.setOnClickListener(new View.OnClickListener(){
 //            @Override
 //            public void onClick(View view){
@@ -153,6 +160,34 @@ public class MainActivity extends AppCompatActivity {
 //                btRcvStop.setEnabled(false);
 //            }
 //        });
+    }
+
+    @Override
+    protected void onResume() {
+        Log.d("MainActivity", "onResume()");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d("MainActivity", "onPause()");
+        super.onPause();
+    }
+
+    @Override
+    public void onRestart(){
+        Log.d("MainActivity", "onRestart()");
+        tvPortNumber.setText(globals.getPortNumber());
+        commPort = Integer.parseInt(globals.getPortNumber());
+        super.onRestart();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d("MainActivity", "onDestroy()");
+        mUDPReceiver.onStop();
+        mWifiStatusUpdateThread.onStop();
+        super.onDestroy();
     }
 
     private static String getWifiIPAddress(Context context) {
@@ -199,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG,"mIsArive status:"+ mIsArive);
             super.start();
         }
+
         public void onStop() {
             Log.d(TAG,"onStop()");
             mIsArive= false;
@@ -259,18 +295,52 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onRestart(){
-        tvPortNumber.setText(globals.getPortNumber());
-        commPort = Integer.parseInt(globals.getPortNumber());
-        super.onRestart();
-    }
+    class WifiStatusUpdateThread extends Thread {
+        private static final String TAG="WifiStatusUpdateThread";
+        boolean mIsArive= false;
 
-    @Override
-    public void onDestroy() {
-        Log.d("MainActivity", "onDestroy()");
-        mUDPReceiver.onStop();
-        super.onDestroy();
+        public WifiStatusUpdateThread(){
+            super();
+        }
+
+        @Override
+        public void start(){
+            mIsArive= true;
+            Log.d(TAG,"mIsArive status:"+ mIsArive);
+            super.start();
+        }
+
+        public void onStop() {
+            Log.d(TAG,"onStop()");
+            mIsArive= false;
+            Log.d(TAG,"mIsArive status:"+ mIsArive);
+        }
+
+//        int cnt = 0;
+
+        @Override
+        public void run(){
+            Log.d(TAG,"In run(): thread start.");
+            while (mIsArive) {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+//                        tvSSID.setText(String.valueOf(cnt));
+//                        tvIpAddress.setText(String.valueOf(cnt));
+//                        cnt++;
+                        tvSSID.setText(getWifiSSID(MainActivity.this));
+                        tvIpAddress.setText(getWifiIPAddress(MainActivity.this));
+                        Log.d(TAG, "run(): mHandler.post() executed.");
+                    }
+                });
+            }
+            Log.d(TAG,"In run(): thread end.");
+        }
     }
 
     @Override

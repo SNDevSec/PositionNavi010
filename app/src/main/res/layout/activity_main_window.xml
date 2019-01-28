@@ -25,11 +25,11 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="end"
+                android:gravity="top"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="@string/tv_distance"
                     android:textColor="#cccccc"
@@ -57,10 +57,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="end">
+                android:gravity="top">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="@string/tv_angle"
                     android:textColor="#cccccc"
@@ -88,7 +88,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:gravity="end">
+                android:gravity="top">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -102,20 +102,20 @@
                     android:id="@+id/tvSSID"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
                     android:text=""
                     android:textColor="#cccccc"
-                    android:textSize="20sp"
-                    android:gravity="end"/>
+                    android:textSize="20sp"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="end">
+                android:gravity="top">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="150dp"
                     android:layout_height="wrap_content"
                     android:text="Navi IP Address:"
                     android:textColor="#cccccc"
@@ -123,22 +123,21 @@
 
                 <TextView
                     android:id="@+id/tvIpAddress"
-                    android:layout_width="150dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text=""
                     android:textColor="#cccccc"
-                    android:textSize="20sp"
-                    android:gravity="end"/>
+                    android:textSize="20sp"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="end">
+                android:gravity="top">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="150dp"
                     android:layout_height="wrap_content"
                     android:text="Port Number:"
                     android:textColor="#cccccc"
@@ -146,12 +145,11 @@
 
                 <TextView
                     android:id="@+id/tvPortNumber"
-                    android:layout_width="150dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text=""
                     android:textColor="#cccccc"
-                    android:textSize="20sp"
-                    android:gravity="end"/>
+                    android:textSize="20sp"/>
             </LinearLayout>
 
             <LinearLayout
